@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>Page Data Scraper</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 360px;
+      font-family: -apple-system, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      background: #0f1117;
+      color: #e2e8f0;
+    }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid #1e2433;
+    }
+    .header-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+    }
+    .header-title { font-weight: 600; font-size: 14px; color: #f1f5f9; }
+    .header-sub   { font-size: 11px; color: #64748b; margin-top: 1px; }
+
+    /* Stats */
+    .stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid #1e2433;
+    }
+    .stat-cell {
+      padding: 10px 16px;
+      border-right: 1px solid #1e2433;
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-num   { font-size: 20px; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 10px; color: #475569; margin-top: 3px; }
+    .num-local  { color: #818cf8; }
+    .num-upload { color: #34d399; }
+    .num-fail   { color: #f87171; }
+
+    /* Export panel */
+    .panel { padding: 12px 16px; border-bottom: 1px solid #1e2433; }
+    .panel-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: #475569; margin-bottom: 8px;
+    }
+    .format-row { display: flex; gap: 6px; margin-bottom: 8px; }
+    .fmt-btn {
+      flex: 1; padding: 6px 0;
+      border: 1px solid #1e2433; border-radius: 6px;
+      background: #161b27; color: #94a3b8;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: all .15s; font-family: 'SF Mono', monospace;
+    }
+    .fmt-btn:hover  { border-color: #6366f1; color: #818cf8; }
+    .fmt-btn.active { border-color: #6366f1; background: #1e1b4b; color: #818cf8; }
+
+    .btn-export {
+      width: 100%; padding: 9px; border: none; border-radius: 7px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .btn-export:hover    { opacity: .85; }
+    .btn-export:disabled { opacity: .4; cursor: not-allowed; }
+
+    .hint { margin: 0 16px 2px; font-size: 10px; color: #334155; line-height: 1.6; }
+    .hint code {
+      font-family: 'SF Mono', monospace;
+      background: #161b27; border-radius: 3px;
+      padding: 1px 4px; color: #64748b;
+    }
+
+    /* Logs */
+    .logs-section { padding: 10px 16px 12px; }
+    .log-item {
+      background: #161b27; border: 1px solid #1e2433;
+      border-radius: 7px; padding: 8px 10px; margin-bottom: 5px;
+    }
+    .log-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 600; padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .dot { width: 5px; height: 5px; border-radius: 50%; }
+
+    /* 上传状态 */
+    .badge-ok   { background: #052e16; color: #4ade80; }
+    .badge-fail { background: #2d0f0f; color: #f87171; }
+    .badge-dup  { background: #1e2433; color: #64748b; }
+    .badge-err  { background: #2d1f00; color: #fbbf24; }
+
+    .badge-ok   .dot { background: #4ade80; }
+    .badge-fail .dot { background: #f87171; }
+    .badge-dup  .dot { background: #64748b; }
+    .badge-err  .dot { background: #fbbf24; }
+
+    /* 本地存储状态 */
+    .local-tag {
+      font-size: 10px; color: #475569;
+      background: #161b27; border: 1px solid #1e2433;
+      border-radius: 3px; padding: 1px 5px;
+    }
+
+    .log-url  { font-size: 11px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .log-time { font-size: 10px; color: #334155; margin-top: 3px; }
+    .log-err  { font-size: 10px; color: #7f1d1d; margin-top: 3px; font-family: monospace; }
+
+    .empty { text-align: center; color: #334155; padding: 18px 16px; font-size: 12px; line-height: 1.8; }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid #1e2433; padding: 8px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .btn-clear {
+      font-size: 10px; color: #475569; background: none;
+      border: 1px solid #1e2433; border-radius: 4px;
+      padding: 3px 8px; cursor: pointer; transition: all .15s;
+    }
+    .btn-clear:hover { color: #ef4444; border-color: #ef4444; }
+    .footer-tip { font-size: 10px; color: #334155; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+      background: #1e2433; border: 1px solid #334155;
+      border-radius: 6px; padding: 6px 14px;
+      font-size: 12px; color: #94a3b8;
+      opacity: 0; transition: opacity .2s;
+      pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🔍</div>
+  <div>
+    <div class="header-title">Page Data Scraper</div>
+    <div class="header-sub">自动采集 · HTTP 上传 · 文件导出</div>
+  </div>
+</div>
+
+<!-- 统计 -->
+<div class="stats">
+  <div class="stat-cell">
+    <div class="stat-num num-local" id="count-local">0</div>
+    <div class="stat-label">本地缓存条数</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-num" id="count-fail" style="color:#f87171">0</div>
+    <div class="stat-label">上传失败待重传</div>
+  </div>
+</div>
+
+<!-- 文件导出 -->
+<div class="panel">
+  <div class="panel-label">导出本地缓存</div>
+  <div class="format-row">
+    <button class="fmt-btn active" data-fmt="json">.json</button>
+    <button class="fmt-btn"        data-fmt="csv" >.csv</button>
+    <button class="fmt-btn"        data-fmt="sql" >.sql</button>
+  </div>
+  <button class="btn-export" id="btn-export" disabled>📥 导出文件</button>
+</div>
+
+<p class="hint" id="export-hint">
+  导出 <code>.json</code> 后可用 MongoDB / Elasticsearch 直接导入
+</p>
+
+<!-- 日志 -->
+<div class="logs-section">
+  <div class="panel-label">最近解析</div>
+  <div id="log-list">
+    <div class="empty">访问目标页面后记录显示在这里</div>
+  </div>
+</div>
+
+<div class="footer">
+  <span class="footer-tip">导出后可清空本地缓存</span>
+  <button class="btn-clear" id="btn-clear">清空记录</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>
