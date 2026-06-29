@@ -12,7 +12,8 @@
   ],
 
   "host_permissions": [
-    "https://breeze1203.github.io/*"
+    "https://breeze1203.github.io/*",
+    "https://*.e-services.cr.gov.hk/*"
   ],
 
   "background": {
@@ -20,9 +21,13 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://breeze1203.github.io/*"],
+      "matches": [
+        "https://breeze1203.github.io/*",
+        "https://*.e-services.cr.gov.hk/*"
+      ],
       "js": ["parser.js", "storage.js", "content.js"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true
     }
   ],
 

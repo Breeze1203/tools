@@ -137,7 +137,8 @@ async function clearRecords() {
  * @param {object} data
  * @returns {Promise<{ success: boolean, status?: number, error?: string }>}
  */
-async function uploadRecord(data) {
+async function uploadRecord(data, options = {}) {
+  const { queueOnFailure = true } = options;
   const url     = `${CONFIG.API_BASE_URL}${CONFIG.ENDPOINT}`;
   const payload = buildPayload(data);
   const headers = {
@@ -179,7 +180,9 @@ async function uploadRecord(data) {
   }
 
   // 上传失败 → 加入补传队列
-  await enqueueFailed(data);
+  if (queueOnFailure) {
+    await enqueueFailed(data);
+  }
   return { success: false, error: lastError };
 }
 
@@ -191,6 +194,14 @@ async function uploadRecord(data) {
 async function enqueueFailed(data) {
   const result = await store.get([CONFIG.FAILED_KEY]);
   const queue  = result[CONFIG.FAILED_KEY] ?? [];
+  const duplicate = queue.some(item =>
+    item.data?.url === data.url &&
+    item.data?.type === data.type &&
+    item.data?.businessRegNo === data.businessRegNo
+  );
+
+  if (duplicate) return;
+
   queue.push({ data, failedAt: new Date().toISOString() });
   if (queue.length > 200) queue.splice(0, queue.length - 200);
   await store.set({ [CONFIG.FAILED_KEY]: queue });
@@ -210,7 +221,7 @@ async function retryFailed() {
   const remaining = [];
 
   for (const item of queue) {
-    const res = await uploadRecord(item.data);
+    const res = await uploadRecord(item.data, { queueOnFailure: false });
     if (res.success) {
       succeeded++;
     } else {

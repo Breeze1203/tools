@@ -15,6 +15,12 @@ const EXPORT_HINTS = {
 };
 
 const BADGE_MAP = {
+  debug       : { cls: 'badge-dup',  label: '已注入' },
+  parse_wait  : { cls: 'badge-dup',  label: '等待渲染' },
+  frame_skipped: { cls: 'badge-dup', label: '跳过 iframe' },
+  no_parser   : { cls: 'badge-dup',  label: '无解析器' },
+  core_missing: { cls: 'badge-err',  label: '模块缺失' },
+  parsed      : { cls: 'badge-ok',   label: '解析成功' },
   uploaded    : { cls: 'badge-ok',   label: '上传成功' },
   upload_failed: { cls: 'badge-fail', label: '上传失败' },
   parse_error : { cls: 'badge-err',  label: '解析出错' },
@@ -49,6 +55,16 @@ function fmtTime(iso) {
   return [d.getHours(), d.getMinutes(), d.getSeconds()]
     .map(n => String(n).padStart(2, '0'))
     .join(':');
+}
+
+function escapeHtml(value = '') {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[ch]));
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -94,6 +110,7 @@ function renderLogs(logs) {
         </div>
         <div class="log-url">${shortUrl(log.tabUrl)}</div>
         <div class="log-time">${fmtTime(log.timestamp)}</div>
+        ${log.detail ? `<div class="log-err">${escapeHtml(log.detail)}</div>` : ''}
         ${log.uploadError ? `<div class="log-err">${log.uploadError}</div>` : ''}
       </div>`;
   }).join('');

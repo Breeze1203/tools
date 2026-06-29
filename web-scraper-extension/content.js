@@ -14,30 +14,40 @@
 'use strict';
 
 (async function main() {
+  log('debug', 'Content script injected', { href: location.href });
+
   // 跳过 iframe，只在顶层页面执行
-  if (window !== window.top) return;
+  if (window !== window.top) {
+    log('frame_skipped', 'Iframe matched but parsing is disabled for frames', { href: location.href });
+    return;
+  }
 
   const { __scraper_parsePage, __scraper_saveRecord,
           __scraper_uploadRecord, __scraper_retryFailed } = window;
 
   if (!__scraper_parsePage || !__scraper_saveRecord) {
     console.error('[Scraper] Core modules not loaded.');
+    log('core_missing', 'Core modules not loaded');
     return;
   }
 
   // ── Step 1：解析 ──────────────────────────────────────
-  const { data, parserKey, error: parseError } = __scraper_parsePage();
+  const { data, parserKey, error: parseError, debug: parseDebug } = await parseWhenReady(__scraper_parsePage);
   console.log(data);
 
   if (parseError) {
     // 非目标页面，静默忽略
-    if (parseError.startsWith('No parser for')) return;
+    if (parseError.startsWith('No parser for')) {
+      log('no_parser', parseError);
+      return;
+    }
     console.warn('[Scraper] Parse error:', parseError);
-    notify({ status: 'parse_error', detail: parseError });
+    log('parse_error', buildParseDetail(parseError, parseDebug), { parserKey, parseDebug });
     return;
   }
 
   console.log(`[Scraper] Parsed (${parserKey}):`, data);
+  log('parsed', buildParseDetail('Page parsed', parseDebug, data), { parserKey, data, parseDebug });
 
   // ── Step 2：并行 — 本地保存 & HTTP 上传 ───────────────
   const [saveResult, uploadResult] = await Promise.all([
@@ -59,7 +69,7 @@
     console.warn('[Scraper] Upload failed, queued for retry:', uploadResult.error);
   }
 
-  notify({
+  log(uploadResult.success ? 'uploaded' : 'upload_failed', uploadResult.success ? 'Uploaded' : 'Upload failed', {
     status      : uploadResult.success ? 'uploaded' : 'upload_failed',
     parserKey,
     localTotal  : saveResult.total,
@@ -75,6 +85,77 @@
     }
   }
 })();
+
+function log(status, detail, extra = {}) {
+  console.log('[Scraper]', status, detail, extra);
+  notify({ status, detail, ...extra });
+}
+
+async function parseWhenReady(parsePage) {
+  const timeoutMs = 12_000;
+  const intervalMs = 500;
+  const startedAt = Date.now();
+  let lastResult = null;
+  let attempts = 0;
+
+  while (Date.now() - startedAt <= timeoutMs) {
+    attempts += 1;
+    lastResult = parsePage();
+
+    if (!lastResult.error || lastResult.error.startsWith('No parser for')) {
+      return lastResult;
+    }
+
+    if (!lastResult.error.includes('target element not found')) {
+      return lastResult;
+    }
+
+    if (attempts === 1) {
+      log('parse_wait', buildParseDetail('Waiting for Vue content', lastResult.debug), {
+        parserKey: lastResult.parserKey,
+        parseDebug: lastResult.debug,
+      });
+    }
+
+    await waitForDomChangeOrTimeout(intervalMs);
+  }
+
+  return lastResult ?? parsePage();
+}
+
+function waitForDomChangeOrTimeout(timeoutMs) {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      observer.disconnect();
+      clearTimeout(timer);
+      resolve();
+    };
+
+    const observer = new MutationObserver(finish);
+    observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+    const timer = setTimeout(finish, timeoutMs);
+  });
+}
+
+function buildParseDetail(message, debug, data = null) {
+  const parts = [message];
+  if (data?.businessRegNo) parts.push(`BR: ${data.businessRegNo}`);
+  if (debug) {
+    const hitCount = Object.keys(debug.hits ?? {}).length;
+    const misses = (debug.misses ?? []).slice(0, 5).join(', ');
+    parts.push(`rows: ${debug.rowCount ?? 0}`);
+    parts.push(`hits: ${hitCount}`);
+    if (debug.vuePlaceholders != null) parts.push(`vue: ${debug.vuePlaceholders}`);
+    if (debug.rootDataBrNo) parts.push(`root BR: ${debug.rootDataBrNo}`);
+    if (debug.skipReason) parts.push(`skip: ${debug.skipReason}`);
+    if (debug.rejectedBusinessRegNoPreview) parts.push(`rejected: ${debug.rejectedBusinessRegNoPreview}`);
+    if (misses) parts.push(`misses: ${misses}`);
+  }
+  return parts.join(' | ');
+}
 
 /**
  * 向 background service worker 发送状态消息。
