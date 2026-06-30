@@ -12,6 +12,16 @@ let recentLogs = [];
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
+  if (message.from === 'storage' && message.action === 'upload') {
+    const { url, payload, headers, timeoutMs } = message.payload;
+
+    uploadJson({ url, payload, headers, timeoutMs })
+      .then(sendResponse)
+      .catch(err => sendResponse({ success: false, error: err.message }));
+
+    return true;
+  }
+
   // ── 文件下载代理 ────────────────────────────────────────
   if (message.from === 'storage' && message.action === 'download') {
     const { content, mimeType, filename } = message.payload;
@@ -53,3 +63,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .catch(() => chrome.storage.local.set({ scraper_logs: recentLogs }));
   }
 });
+
+async function uploadJson({ url, payload, headers = {}, timeoutMs = 8000 }) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    const text = await response.text().catch(() => '');
+    return {
+      success: true,
+      ok: response.ok,
+      status: response.status,
+      text: text.slice(0, 500),
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err.name === 'AbortError' ? 'Request timed out' : err.message,
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}

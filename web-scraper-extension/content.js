@@ -1,90 +1,115 @@
 /**
  * content.js
  *
- * 职责：页面加载后协调解析与存储。
- * 执行顺序：
- *   1. 调用 parser.js 解析当前页面
- *   2. 并行执行：本地保存 + HTTP 上传
- *   3. 补传上次失败的记录
- *   4. 上报状态给 background.js（供 popup 展示）
- *
- * 该文件通常不需要修改。
+ * The content script stays idle after injection. The popup sends a
+ * `collect` message when the user clicks "Start collection".
  */
 
 'use strict';
 
-(async function main() {
-  log('debug', 'Content script injected', { href: location.href });
+(function main() {
+  if (window.__scraper_contentReady) return;
+  window.__scraper_contentReady = true;
 
-  // 跳过 iframe，只在顶层页面执行
+  log('debug', 'Content script ready', { href: location.href });
+
   if (window !== window.top) {
-    log('frame_skipped', 'Iframe matched but parsing is disabled for frames', { href: location.href });
+    log('frame_skipped', 'Iframe matched but collection is disabled for frames', { href: location.href });
     return;
   }
 
-  const { __scraper_parsePage, __scraper_saveRecord,
-          __scraper_uploadRecord, __scraper_retryFailed } = window;
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.from !== 'popup' || message?.action !== 'collect') return;
 
-  if (!__scraper_parsePage || !__scraper_saveRecord) {
-    console.error('[Scraper] Core modules not loaded.');
-    log('core_missing', 'Core modules not loaded');
-    return;
-  }
+    collect()
+      .then(result => sendResponse(result))
+      .catch(err => {
+        log('parse_error', err.message);
+        sendResponse({ success: false, error: err.message });
+      });
 
-  // ── Step 1：解析 ──────────────────────────────────────
-  const { data, parserKey, error: parseError, debug: parseDebug } = await parseWhenReady(__scraper_parsePage);
-  console.log(data);
-
-  if (parseError) {
-    // 非目标页面，静默忽略
-    if (parseError.startsWith('No parser for')) {
-      log('no_parser', parseError);
-      return;
-    }
-    console.warn('[Scraper] Parse error:', parseError);
-    log('parse_error', buildParseDetail(parseError, parseDebug), { parserKey, parseDebug });
-    return;
-  }
-
-  console.log(`[Scraper] Parsed (${parserKey}):`, data);
-  log('parsed', buildParseDetail('Page parsed', parseDebug, data), { parserKey, data, parseDebug });
-
-  // ── Step 2：并行 — 本地保存 & HTTP 上传 ───────────────
-  const [saveResult, uploadResult] = await Promise.all([
-    __scraper_saveRecord(data),
-    __scraper_uploadRecord(data),
-  ]);
-
-  // 本地保存结果
-  if (saveResult.duplicate) {
-    console.log('[Scraper] Duplicate record, skipped local save.');
-  } else {
-    console.log(`[Scraper] Saved locally. Total: ${saveResult.total}`);
-  }
-
-  // HTTP 上传结果
-  if (uploadResult.success) {
-    console.log(`[Scraper] Uploaded. HTTP ${uploadResult.status}`);
-  } else {
-    console.warn('[Scraper] Upload failed, queued for retry:', uploadResult.error);
-  }
-
-  log(uploadResult.success ? 'uploaded' : 'upload_failed', uploadResult.success ? 'Uploaded' : 'Upload failed', {
-    status      : uploadResult.success ? 'uploaded' : 'upload_failed',
-    parserKey,
-    localTotal  : saveResult.total,
-    duplicate   : saveResult.duplicate,
-    uploadError : uploadResult.error ?? null,
+    return true;
   });
-
-  // ── Step 3：补传历史失败记录 ──────────────────────────
-  if (__scraper_retryFailed) {
-    const { retried, succeeded } = await __scraper_retryFailed();
-    if (retried > 0) {
-      console.log(`[Scraper] Retry: ${succeeded}/${retried} succeeded.`);
-    }
-  }
 })();
+
+let isCollecting = false;
+
+async function collect() {
+  if (isCollecting) {
+    return { success: false, error: 'Collection is already running' };
+  }
+
+  isCollecting = true;
+  log('collecting', 'Collection started', { href: location.href });
+
+  try {
+    const {
+      __scraper_parsePage,
+      __scraper_saveRecord,
+      __scraper_uploadRecord,
+      __scraper_retryFailed,
+    } = window;
+
+    if (!__scraper_parsePage || !__scraper_saveRecord) {
+      console.error('[Scraper] Core modules not loaded.');
+      log('core_missing', 'Core modules not loaded');
+      return { success: false, error: 'Core modules not loaded' };
+    }
+
+    const { data, parserKey, error: parseError, debug: parseDebug } =
+      await parseWhenReady(__scraper_parsePage);
+    console.log(data);
+
+    if (parseError) {
+      if (parseError.startsWith('No parser for')) {
+        log('no_parser', parseError);
+        return { success: false, error: parseError };
+      }
+
+      console.warn('[Scraper] Parse error:', parseError);
+      log('parse_error', buildParseDetail(parseError, parseDebug), { parserKey, parseDebug });
+      return { success: false, error: parseError };
+    }
+
+    console.log(`[Scraper] Parsed (${parserKey}):`, data);
+    log('parsed', buildParseDetail('Page parsed', parseDebug, data), { parserKey, data, parseDebug });
+
+    const [saveResult, uploadResult] = await Promise.all([
+      __scraper_saveRecord(data),
+      __scraper_uploadRecord(data),
+    ]);
+
+    if (saveResult.duplicate) {
+      console.log('[Scraper] Duplicate record, skipped local save.');
+    } else {
+      console.log(`[Scraper] Saved locally. Total: ${saveResult.total}`);
+    }
+
+    if (uploadResult.success) {
+      console.log(`[Scraper] Uploaded. HTTP ${uploadResult.status}`);
+    } else {
+      console.warn('[Scraper] Upload failed, queued for retry:', uploadResult.error);
+    }
+
+    log(uploadResult.success ? 'uploaded' : 'upload_failed', uploadResult.success ? 'Uploaded' : 'Upload failed', {
+      parserKey,
+      localTotal: saveResult.total,
+      duplicate: saveResult.duplicate,
+      uploadError: uploadResult.error ?? null,
+    });
+
+    if (__scraper_retryFailed) {
+      const { retried, succeeded } = await __scraper_retryFailed();
+      if (retried > 0) {
+        console.log(`[Scraper] Retry: ${succeeded}/${retried} succeeded.`);
+      }
+    }
+
+    return { success: true, parserKey, data, saveResult, uploadResult };
+  } finally {
+    isCollecting = false;
+  }
+}
 
 function log(status, detail, extra = {}) {
   console.log('[Scraper]', status, detail, extra);
@@ -157,14 +182,10 @@ function buildParseDetail(message, debug, data = null) {
   return parts.join(' | ');
 }
 
-/**
- * 向 background service worker 发送状态消息。
- * @param {object} payload
- */
 function notify(payload) {
   try {
     chrome.runtime.sendMessage({ from: 'content', ...payload });
   } catch (_) {
-    // 扩展被禁用或页面卸载时忽略
+    // Extension was disabled or the page unloaded.
   }
 }

@@ -69,6 +69,14 @@
       color: #fff; font-size: 13px; font-weight: 600;
       cursor: pointer; transition: opacity .15s;
     }
+    .btn-collect {
+      width: 100%; padding: 9px; border: none; border-radius: 7px;
+      background: #2563eb;
+      color: #fff; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .btn-collect:hover    { opacity: .85; }
+    .btn-collect:disabled { opacity: .4; cursor: not-allowed; }
     .btn-export:hover    { opacity: .85; }
     .btn-export:disabled { opacity: .4; cursor: not-allowed; }
 
@@ -162,6 +170,12 @@
     <div class="stat-num" id="count-fail" style="color:#f87171">0</div>
     <div class="stat-label">上传失败待重传</div>
   </div>
+</div>
+
+<!-- 手动采集 -->
+<div class="panel">
+  <div class="panel-label">手动采集</div>
+  <button class="btn-collect" id="btn-collect">开始采集</button>
 </div>
 
 <!-- 文件导出 -->

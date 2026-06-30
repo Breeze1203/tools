@@ -9,7 +9,6 @@
  *
  * ✏️ 修改指南：
  *   - API_BASE_URL / ENDPOINT：换成真实后端地址
- *   - AUTH_TOKEN：换成真实 Token（或从 chrome.storage 动态读取）
  *   - buildPayload()：把占位字段 abc 替换成真实业务字段
  *   - TABLE_NAME：SQL 导出时的目标表名
  */
@@ -22,9 +21,8 @@
 
 const CONFIG = {
   // HTTP 上传
-  API_BASE_URL : 'https://your-api.com',  // ✏️ 后端地址
-  ENDPOINT     : '/api/scrape-data',       // ✏️ 接口路径
-  AUTH_TOKEN   : 'YOUR_TOKEN_HERE',        // ✏️ Bearer Token
+  API_BASE_URL : 'http://localhost:8888',  // ✏️ 后端地址
+  ENDPOINT     : '/api/crm/crmServiceSubject/saveHkInformation',       // ✏️ 接口路径
   TIMEOUT_MS   : 8_000,
   MAX_RETRIES  : 2,
 
@@ -50,9 +48,17 @@ const CONFIG = {
  */
 function buildPayload(data) {
   return {
-    abc  : data.abc  ?? null,   // ✏️ 替换为真实字段，如 data.title
-    abc1 : data.abc1 ?? null,   // ✏️ 替换为真实字段，如 data.price
-    abc2 : data.abc2 ?? null,   // ✏️ 替换为真实字段，如 data.url
+    type               : data.type ?? null,
+    tenantId           : 1827240738649612290,
+    businessRegNo      : data.businessRegNo ?? null,
+    companyNameEn      : data.companyNameEn ?? null,
+    companyNameZh      : data.companyNameZh ?? null,
+    companyType        : data.companyType ?? null,
+    incorporationDate  : data.incorporationDate ?? null,
+    status             : data.status ?? null,
+    remarks            : data.remarks ?? null,
+    liquidationMode    : data.liquidationMode ?? null,
+    chargeRegistration : data.chargeRegistration ?? null,
   };
 }
 
@@ -73,15 +79,25 @@ const store = {
   ),
 };
 
-/** 带超时的 fetch */
-async function fetchWithTimeout(url, options) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), CONFIG.TIMEOUT_MS);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
+/** Ask the extension service worker to upload, avoiding page CORS limits. */
+function uploadViaBackground(url, payload, headers) {
+  return new Promise(resolve => {
+    chrome.runtime.sendMessage(
+      {
+        from: 'storage',
+        action: 'upload',
+        payload: { url, payload, headers, timeoutMs: CONFIG.TIMEOUT_MS },
+      },
+      response => {
+        if (chrome.runtime.lastError) {
+          resolve({ success: false, error: chrome.runtime.lastError.message });
+          return;
+        }
+
+        resolve(response ?? { success: false, error: 'No response from background uploader' });
+      }
+    );
+  });
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -141,9 +157,10 @@ async function uploadRecord(data, options = {}) {
   const { queueOnFailure = true } = options;
   const url     = `${CONFIG.API_BASE_URL}${CONFIG.ENDPOINT}`;
   const payload = buildPayload(data);
+  console.log('[Scraper] Upload payload:', payload);
   const headers = {
     'Content-Type' : 'application/json',
-    'Authorization': `Bearer ${CONFIG.AUTH_TOKEN}`,
+    'TENANT-ID': '1827240738649612290',
   };
 
   let lastError = '';
@@ -154,11 +171,11 @@ async function uploadRecord(data, options = {}) {
     }
 
     try {
-      const response = await fetchWithTimeout(url, {
-        method : 'POST',
-        headers,
-        body   : JSON.stringify(payload),
-      });
+      const response = await uploadViaBackground(url, payload, headers);
+
+      if (!response.success) {
+        throw new Error(response.error || 'Upload failed');
+      }
 
       if (response.ok) {
         return { success: true, status: response.status };
@@ -166,8 +183,7 @@ async function uploadRecord(data, options = {}) {
 
       // 4xx 不重试（客户端错误，重试无意义）
       if (response.status >= 400 && response.status < 500) {
-        const text = await response.text().catch(() => '');
-        lastError = `HTTP ${response.status}: ${text.slice(0, 120)}`;
+        lastError = `HTTP ${response.status}: ${(response.text || '').slice(0, 120)}`;
         break;
       }
 

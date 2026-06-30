@@ -13,7 +13,8 @@
 
   "host_permissions": [
     "https://breeze1203.github.io/*",
-    "https://*.e-services.cr.gov.hk/*"
+    "https://*.e-services.cr.gov.hk/*",
+    "http://localhost:8888/*"
   ],
 
   "background": {

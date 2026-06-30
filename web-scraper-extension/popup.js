@@ -16,6 +16,7 @@ const EXPORT_HINTS = {
 
 const BADGE_MAP = {
   debug       : { cls: 'badge-dup',  label: '已注入' },
+  collecting  : { cls: 'badge-dup',  label: '采集中' },
   parse_wait  : { cls: 'badge-dup',  label: '等待渲染' },
   frame_skipped: { cls: 'badge-dup', label: '跳过 iframe' },
   no_parser   : { cls: 'badge-dup',  label: '无解析器' },
@@ -128,6 +129,56 @@ function loadLogs() {
 // 格式转换（与 storage.js 保持一致，popup 里自包含实现）
 // ─────────────────────────────────────────────────────────────
 
+function getActiveTab() {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      const tab = tabs?.[0];
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+      } else if (!tab?.id) {
+        reject(new Error('没有找到当前标签页'));
+      } else {
+        resolve(tab);
+      }
+    });
+  });
+}
+
+function sendCollectMessage(tabId) {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.sendMessage(tabId, { from: 'popup', action: 'collect' }, response => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
+      }
+
+      resolve(response ?? { success: false, error: '页面没有返回采集结果' });
+    });
+  });
+}
+
+function injectContentScripts(tabId) {
+  return chrome.scripting.executeScript({
+    target: { tabId },
+    files: ['parser.js', 'storage.js', 'content.js'],
+  });
+}
+
+async function collectActiveTab() {
+  const tab = await getActiveTab();
+
+  try {
+    return await sendCollectMessage(tab.id);
+  } catch (err) {
+    if (!err.message.includes('Receiving end does not exist')) {
+      throw err;
+    }
+
+    await injectContentScripts(tab.id);
+    return sendCollectMessage(tab.id);
+  }
+}
+
 function toJSON(records) {
   return JSON.stringify(records, null, 2);
 }
@@ -169,6 +220,29 @@ function toSQL(records) {
 // ─────────────────────────────────────────────────────────────
 // 事件绑定
 // ─────────────────────────────────────────────────────────────
+
+// 手动采集
+document.getElementById('btn-collect').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-collect');
+  btn.disabled = true;
+  btn.textContent = '采集中...';
+
+  try {
+    const result = await collectActiveTab();
+    if (result.success) {
+      toast('采集完成');
+    } else {
+      toast('采集失败: ' + (result.error ?? '未知错误'));
+    }
+  } catch (err) {
+    toast('采集失败: ' + err.message, 3200);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '开始采集';
+    refreshStats();
+    loadLogs();
+  }
+});
 
 // 格式切换
 document.querySelectorAll('.fmt-btn').forEach(btn => {
