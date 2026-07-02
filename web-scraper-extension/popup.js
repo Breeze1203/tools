@@ -23,6 +23,7 @@ const BADGE_MAP = {
   core_missing: { cls: 'badge-err',  label: '模块缺失' },
   parsed      : { cls: 'badge-ok',   label: '解析成功' },
   uploaded    : { cls: 'badge-ok',   label: '上传成功' },
+  upload_skipped: { cls: 'badge-dup', label: '记录已存在' },
   upload_failed: { cls: 'badge-fail', label: '上传失败' },
   parse_error : { cls: 'badge-err',  label: '解析出错' },
   save_error  : { cls: 'badge-err',  label: '保存出错' },

@@ -85,17 +85,25 @@ async function collect() {
       console.log(`[Scraper] Saved locally. Total: ${saveResult.total}`);
     }
 
-    if (uploadResult.success) {
+    if (uploadResult.skipped) {
+      console.log(`[Scraper] Upload skipped. HTTP ${uploadResult.status}: ${uploadResult.detail}`);
+    } else if (uploadResult.success) {
       console.log(`[Scraper] Uploaded. HTTP ${uploadResult.status}`);
     } else {
       console.warn('[Scraper] Upload failed, queued for retry:', uploadResult.error);
     }
 
-    log(uploadResult.success ? 'uploaded' : 'upload_failed', uploadResult.success ? 'Uploaded' : 'Upload failed', {
+    const uploadStatus = uploadResult.skipped
+      ? 'upload_skipped'
+      : (uploadResult.success ? 'uploaded' : 'upload_failed');
+    const uploadDetail = uploadResult.detail ?? (uploadResult.success ? 'Uploaded' : 'Upload failed');
+
+    log(uploadStatus, uploadDetail, {
       parserKey,
       localTotal: saveResult.total,
       duplicate: saveResult.duplicate,
       uploadError: uploadResult.error ?? null,
+      uploadResult: uploadResult.result ?? null,
     });
 
     if (__scraper_retryFailed) {

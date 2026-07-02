@@ -100,6 +100,20 @@ function uploadViaBackground(url, payload, headers) {
   });
 }
 
+function parseUploadResult(text) {
+  if (!text) return null;
+
+  try {
+    const body = JSON.parse(text);
+    const value = body?.data ?? body?.result ?? body;
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) ? numberValue : null;
+  } catch (_) {
+    const numberValue = Number(text);
+    return Number.isFinite(numberValue) ? numberValue : null;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────
 // 1. 本地积累
 // ─────────────────────────────────────────────────────────────
@@ -178,7 +192,24 @@ async function uploadRecord(data, options = {}) {
       }
 
       if (response.ok) {
-        return { success: true, status: response.status };
+        const resultValue = parseUploadResult(response.text);
+
+        if (resultValue > 0) {
+          return {
+            success: true,
+            status: response.status,
+            result: resultValue,
+            detail: '保存成功',
+          };
+        }
+
+        return {
+          success: true,
+          status: response.status,
+          result: resultValue,
+          skipped: true,
+          detail: `当前记录已存在，请勿重复上传`,
+        };
       }
 
       // 4xx 不重试（客户端错误，重试无意义）
