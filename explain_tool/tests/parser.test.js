@@ -44,4 +44,12 @@ const zeroStart = parseExplain("-> Aggregate: count(0)  (cost=10 rows=1) (actual
 assert.equal(zeroStart.nodes[0].actualStart, 0);
 assert.equal(zeroStart.nodes[0].actualEnd, 10);
 
+const exponentTime = parseExplain(
+  "-> Single-row index lookup on fs using PRIMARY (id=o.fin_subject_id)  (cost=0.381 rows=1) (actual time=730e-6..751e-6 rows=0.958 loops=59834)",
+);
+assert.equal(exponentTime.nodes[0].actualStart, 0.00073);
+assert.equal(exponentTime.nodes[0].actualEnd, 0.000751);
+assert.equal(exponentTime.nodes[0].actualRows, 0.958);
+assert.equal(exponentTime.nodes[0].loops, 59834);
+
 console.log("parser tests passed");

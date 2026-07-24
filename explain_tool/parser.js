@@ -1,4 +1,6 @@
 (function (root) {
+  const NUMBER_PATTERN = "\\d+(?:\\.\\d+)?(?:e[+-]?\\d+)?";
+
   function parseExplain(text) {
     const roots = [];
     const stack = [];
@@ -35,8 +37,8 @@
   function parseNode(line, depth, id) {
     const cost = readGroup(line, "cost");
     const actual = readGroup(line, "actual time");
-    const rowsMatch = line.match(/\(actual time=[^)]+ rows=([\d.]+) loops=([\d.]+)\)/);
-    const estimateRows = line.match(/\(cost=[^)]+ rows=([\d.]+)\)/);
+    const rowsMatch = line.match(new RegExp(`\\(actual time=[^)]+ rows=(${NUMBER_PATTERN}) loops=(${NUMBER_PATTERN})\\)`));
+    const estimateRows = line.match(new RegExp(`\\(cost=[^)]+ rows=(${NUMBER_PATTERN})\\)`));
     const title = cleanupTitle(line);
     const table = extractTable(title);
     const index = extractIndex(title);
@@ -68,8 +70,7 @@
 
   function readGroup(line, label) {
     const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const number = "(\\d+(?:\\.\\d+)?)";
-    const match = line.match(new RegExp(`${escaped}=${number}(?:\\.\\.${number})?`));
+    const match = line.match(new RegExp(`${escaped}=(${NUMBER_PATTERN})(?:\\.\\.(${NUMBER_PATTERN}))?`));
     if (!match) return [null, null];
     return [Number(match[1]), match[2] ? Number(match[2]) : Number(match[1])];
   }

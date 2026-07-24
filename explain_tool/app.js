@@ -25,7 +25,7 @@ const I18N = {
     analyze: "分析",
     clear: "清空",
     nodes: "节点数",
-    pureTime: "纯耗时",
+    pureTime: "总耗时",
     bottleneck: "瓶颈节点",
     estimateDrift: "最大偏差",
     tree: "执行树",
@@ -35,6 +35,8 @@ const I18N = {
     emptyTitle: "等待执行计划",
     emptyBody: "分析后会高亮纯耗时瓶颈、预估偏差、表扫描、索引和行数。",
     selfTime: "纯耗时",
+    actualTime: "实际耗时",
+    actualRange: "实际时间区间",
     selfPercent: "纯耗时占比",
     cumulativeTime: "累计耗时",
     cumulativePercent: "累计占比",
@@ -55,7 +57,7 @@ const I18N = {
     noTimedNodes: "没有可计算耗时的节点",
     noIndexNodes: "没有解析到索引访问或表扫描节点。",
     schemaHint: "提示：粘贴 SHOW CREATE TABLE 后，可以把执行计划中的索引名映射到完整索引字段。",
-    focusBottleneck: "优先看纯耗时最高的节点",
+    focusBottleneck: "优先看实际耗时最高的节点",
     focusEstimate: "预估与实际行数偏差较大",
     focusScan: "存在表扫描，检查过滤条件和可用索引",
     goodPlan: "没有明显高风险节点",
@@ -70,7 +72,7 @@ const I18N = {
     analyze: "Analyze",
     clear: "Clear",
     nodes: "Nodes",
-    pureTime: "Pure time",
+    pureTime: "Total time",
     bottleneck: "Bottleneck",
     estimateDrift: "Max drift",
     tree: "Tree",
@@ -80,6 +82,8 @@ const I18N = {
     emptyTitle: "Waiting for a plan",
     emptyBody: "Analysis highlights pure-time bottlenecks, estimate drift, table scans, indexes, and row counts.",
     selfTime: "Pure time",
+    actualTime: "Actual time",
+    actualRange: "Actual range",
     selfPercent: "Pure share",
     cumulativeTime: "Cumulative time",
     cumulativePercent: "Cumulative share",
@@ -100,7 +104,7 @@ const I18N = {
     noTimedNodes: "No timed nodes",
     noIndexNodes: "No index access or table-scan nodes parsed.",
     schemaHint: "Tip: paste SHOW CREATE TABLE to map index names to full index columns.",
-    focusBottleneck: "Start with the highest pure-time node",
+    focusBottleneck: "Start with the highest actual-time node",
     focusEstimate: "Estimated and actual rows diverge heavily",
     focusScan: "Table scans detected; check predicates and usable indexes",
     goodPlan: "No obvious high-risk nodes",
@@ -177,23 +181,23 @@ function render() {
 }
 
 function renderSummary() {
-  const bottleneck = sortedBySelf()[0];
+  const bottleneck = sortedByActual()[0];
   const drift = sortedByDrift()[0];
 
   el.nodeCount.textContent = state.nodes.length;
-  el.totalSelfTime.textContent = ExplainMetrics.formatTime(state.analysis.totalSelf);
+  el.totalSelfTime.textContent = ExplainMetrics.formatTime(state.analysis.totalActual);
   el.bottleneckNode.textContent = bottleneck ? bottleneck.node.operation : "-";
   el.worstDrift.textContent = drift ? ExplainMetrics.formatRatio(drift.metrics.ratio) : "-";
 }
 
 function renderInsights() {
   const items = [];
-  const bottleneck = sortedBySelf()[0];
+  const bottleneck = sortedByActual()[0];
   const drift = sortedByDrift()[0];
   const scans = state.nodes.filter((node) => metricsFor(node).tableScan);
 
-  if (bottleneck && Number.isFinite(bottleneck.metrics.self)) {
-    items.push(`${t("focusBottleneck")}: ${bottleneck.node.operation} (${ExplainMetrics.formatTime(bottleneck.metrics.self)})`);
+  if (bottleneck && Number.isFinite(bottleneck.metrics.cumulative)) {
+    items.push(`${t("focusBottleneck")}: ${bottleneck.node.operation} (${ExplainMetrics.formatTime(bottleneck.metrics.cumulative)})`);
   }
   if (drift && drift.metrics.estimateLevel !== "good") {
     items.push(`${t("focusEstimate")}: ${drift.node.operation} (${ExplainMetrics.formatRatio(drift.metrics.ratio)})`);
@@ -245,7 +249,7 @@ function renderPlanHeader() {
     t("operation"),
     t("table"),
     t("index"),
-    t("selfTime"),
+    t("actualTime"),
     `${t("estimatedRows")} / ${t("actualRows")}`,
     t("rowDrift"),
     t("loops"),
@@ -275,7 +279,7 @@ function renderPlanRow(node, depth) {
     operationCell(node, depth),
     textCell(node.table || "-"),
     textCell(node.index || "-"),
-    metricCell(ExplainMetrics.formatTime(metrics.self), ExplainMetrics.formatPercent(metrics.selfPercent)),
+    actualTimeCell(node, metrics),
     metricCell(ExplainMetrics.displayNumber(node.estimatedRows), ExplainMetrics.displayNumber(node.actualRows)),
     statusCell(ExplainMetrics.formatRatio(metrics.ratio), `estimate-${metrics.estimateLevel}`),
     textCell(ExplainMetrics.displayNumber(node.loops)),
@@ -343,6 +347,27 @@ function metricCell(primary, secondary) {
   return cell;
 }
 
+function actualTimeCell(node, metrics) {
+  const cell = document.createElement("div");
+  cell.className = "plan-time-cell";
+
+  const primary = document.createElement("span");
+  primary.className = "time-primary";
+  primary.textContent = ExplainMetrics.formatTime(metrics.cumulative);
+
+  const range = document.createElement("span");
+  range.className = "time-range";
+  range.textContent = actualTimeRange(node);
+
+  cell.append(primary, range);
+  return cell;
+}
+
+function actualTimeRange(node) {
+  if (!Number.isFinite(node.actualStart) || !Number.isFinite(node.actualEnd)) return "-";
+  return `${ExplainMetrics.formatTime(node.actualStart)}..${ExplainMetrics.formatTime(node.actualEnd)}`;
+}
+
 function statusCell(value, className) {
   const cell = document.createElement("div");
   cell.className = "plan-status-cell";
@@ -360,7 +385,9 @@ function showDetails(event, row, node, metrics) {
   detailPopover.replaceChildren();
   [
     [t("operation"), node.operation],
-    [t("cumulativeTime"), ExplainMetrics.formatTime(metrics.cumulative)],
+    [t("actualTime"), ExplainMetrics.formatTime(metrics.cumulative)],
+    [t("actualRange"), actualTimeRange(node)],
+    [t("selfTime"), ExplainMetrics.formatTime(metrics.self)],
     [t("cumulativePercent"), ExplainMetrics.formatPercent(metrics.cumulativePercent)],
     [t("indexColumns"), indexColumns(node).join(", ") || inferredColumns(node)],
     [t("condition"), node.condition || "-"],
@@ -415,6 +442,7 @@ function renderHotspots() {
     row.className = `hotspot-row focus-${focusLevel(metrics)}`;
     row.innerHTML = `
       <div class="row-title">${escapeHtml(node.operation)}</div>
+      <div class="row-cell"><b>${escapeHtml(t("actualTime"))}</b>${escapeHtml(ExplainMetrics.formatTime(metrics.cumulative))}</div>
       <div class="row-cell"><b>${escapeHtml(t("selfTime"))}</b>${escapeHtml(ExplainMetrics.formatTime(metrics.self))}</div>
       <div class="row-cell"><b>${escapeHtml(t("rowDrift"))}</b>${escapeHtml(ExplainMetrics.formatRatio(metrics.ratio))}</div>
       <div class="row-cell"><b>${escapeHtml(t("table"))}</b>${escapeHtml(node.table || "-")}</div>
@@ -458,6 +486,13 @@ function sortedBySelf() {
     .map((node) => ({ node, metrics: metricsFor(node) }))
     .filter((item) => Number.isFinite(item.metrics.self))
     .sort((a, b) => b.metrics.self - a.metrics.self);
+}
+
+function sortedByActual() {
+  return state.nodes
+    .map((node) => ({ node, metrics: metricsFor(node) }))
+    .filter((item) => Number.isFinite(item.metrics.cumulative))
+    .sort((a, b) => b.metrics.cumulative - a.metrics.cumulative);
 }
 
 function sortedByDrift() {

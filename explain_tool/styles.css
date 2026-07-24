@@ -331,7 +331,7 @@ button {
 
 .plan-row {
   display: grid;
-  grid-template-columns: minmax(320px, 1.55fr) minmax(170px, 0.95fr) minmax(150px, 0.86fr) minmax(160px, 0.78fr) minmax(140px, 0.7fr) minmax(90px, 0.44fr) minmax(74px, 0.36fr) minmax(92px, 0.4fr);
+  grid-template-columns: minmax(320px, 1.55fr) minmax(170px, 0.92fr) minmax(150px, 0.82fr) minmax(180px, 0.9fr) minmax(140px, 0.68fr) minmax(90px, 0.42fr) minmax(74px, 0.34fr) minmax(92px, 0.38fr);
   min-height: 46px;
   border-bottom: 1px solid var(--line);
 }
@@ -454,6 +454,30 @@ button {
   color: var(--ink);
   font-size: 13px;
   font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-time-cell {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  gap: 2px;
+  color: var(--ink);
+}
+
+.time-primary {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 780;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time-range {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
