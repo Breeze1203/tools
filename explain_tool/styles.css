@@ -425,9 +425,11 @@ button {
 }
 
 .operation-text {
-  overflow-wrap: anywhere;
+  overflow: hidden;
   color: var(--ink);
   font-weight: 780;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .operation-subtext {

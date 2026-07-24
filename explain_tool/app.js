@@ -214,9 +214,28 @@ function renderInsights() {
 function renderTree() {
   const grid = document.createElement("div");
   grid.className = "plan-grid";
+  grid.style.minWidth = `${minimumPlanGridWidth()}px`;
   grid.appendChild(renderPlanHeader());
   state.roots.forEach((node) => appendPlanRows(grid, node, 0, true));
   el.treeView.replaceChildren(grid);
+}
+
+function minimumPlanGridWidth() {
+  const baseWidth = 1160;
+  const comfortableDepth = 3;
+  const extraDepth = Math.max(0, visibleMaxDepth() - comfortableDepth);
+  return baseWidth + extraDepth * 28;
+}
+
+function visibleMaxDepth() {
+  let maxDepth = 0;
+  const visit = (node, depth) => {
+    maxDepth = Math.max(maxDepth, depth);
+    if (state.collapsed.has(node.id)) return;
+    node.children.forEach((child) => visit(child, depth + 1));
+  };
+  state.roots.forEach((node) => visit(node, 0));
+  return maxDepth;
 }
 
 function renderPlanHeader() {
