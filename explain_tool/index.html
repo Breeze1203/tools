@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EXPLAIN ANALYZE Inspector</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace">
+        <aside class="input-pane" aria-label="Input">
+          <div class="pane-header">
+            <div>
+              <h1 data-i18n="appTitle">EXPLAIN ANALYZE</h1>
+              <p data-i18n="appSubtitle">Paste MySQL TREE output to inspect hierarchy, bottlenecks, indexes, and row-estimate drift.</p>
+            </div>
+            <div class="header-actions">
+              <button id="languageBtn" class="icon-button text-icon" type="button" title="Language">中/EN</button>
+              <button id="loadSample" class="icon-button" type="button" title="Load sample" aria-label="Load sample">
+                <span aria-hidden="true">↺</span>
+              </button>
+            </div>
+          </div>
+
+          <label class="field-label" for="explainInput" data-i18n="planLabel">Execution plan</label>
+          <textarea id="explainInput" spellcheck="false" data-i18n-placeholder="planPlaceholder"></textarea>
+
+          <label class="field-label" for="schemaInput" data-i18n="schemaLabel">Index definitions, optional</label>
+          <textarea id="schemaInput" spellcheck="false" data-i18n-placeholder="schemaPlaceholder"></textarea>
+
+          <div class="actions">
+            <button id="analyzeBtn" class="primary-button" type="button" data-i18n="analyze">Analyze</button>
+            <button id="clearBtn" class="secondary-button" type="button" data-i18n="clear">Clear</button>
+          </div>
+        </aside>
+
+        <section class="result-pane" aria-label="Results">
+          <div class="summary-grid">
+            <article>
+              <span class="metric-label" data-i18n="nodes">Nodes</span>
+              <strong id="nodeCount">0</strong>
+            </article>
+            <article>
+              <span class="metric-label" data-i18n="pureTime">Pure time</span>
+              <strong id="totalSelfTime">-</strong>
+            </article>
+            <article>
+              <span class="metric-label" data-i18n="bottleneck">Bottleneck</span>
+              <strong id="bottleneckNode">-</strong>
+            </article>
+            <article>
+              <span class="metric-label" data-i18n="estimateDrift">Estimate drift</span>
+              <strong id="worstDrift">-</strong>
+            </article>
+          </div>
+
+          <div id="insights" class="insights"></div>
+
+          <div class="toolbar" aria-label="View tools">
+            <div class="segmented" role="tablist" aria-label="Result views">
+              <button class="tab active" type="button" data-view="tree" data-i18n="tree">Tree</button>
+              <button class="tab" type="button" data-view="hotspots" data-i18n="hotspots">Hotspots</button>
+              <button class="tab" type="button" data-view="indexes" data-i18n="indexes">Indexes</button>
+            </div>
+            <label class="switch">
+              <input id="focusToggle" type="checkbox" checked>
+              <span data-i18n="smartFocus">Smart focus</span>
+            </label>
+          </div>
+
+          <div id="emptyState" class="empty-state">
+            <h2 data-i18n="emptyTitle">Waiting for a plan</h2>
+            <p data-i18n="emptyBody">After analysis, the tree highlights pure-time bottlenecks, estimate drift, scans, indexes, and row counts.</p>
+          </div>
+
+          <div id="treeView" class="view active"></div>
+          <div id="hotspotsView" class="view"></div>
+          <div id="indexesView" class="view"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="parser.js"></script>
+    <script src="metrics.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
