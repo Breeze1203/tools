@@ -1,0 +1,2309 @@
+:root {
+  color: #3b2a21;
+  font-family: "Microsoft YaHei UI", "PingFang SC", "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.pet-shell {
+  width: 220px;
+  height: 260px;
+  position: relative;
+  transform-origin: center bottom;
+  user-select: none;
+}
+
+.pet-button {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  cursor: grab;
+  background: transparent;
+  color: inherit;
+  touch-action: none;
+}
+
+.pet-button:active {
+  cursor: grabbing;
+}
+
+.pet-title {
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  translate: -50% 0;
+  width: max-content;
+  max-width: 190px;
+  padding: 4px 8px;
+  border: 1px solid rgba(125, 68, 40, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 243, 223, 0.9);
+  color: #5a3928;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.speech-bubble {
+  position: absolute;
+  z-index: 3;
+  top: 7px;
+  left: 50%;
+  translate: -50% 0;
+  max-width: 190px;
+  min-height: 28px;
+  padding: 6px 10px;
+  border: 1px solid rgba(125, 68, 40, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 247, 232, 0.94);
+  box-shadow: 0 6px 18px rgba(82, 51, 31, 0.14);
+  color: #4b2d1e;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 160ms ease, transform 160ms ease;
+  pointer-events: auto;
+}
+
+.pet-shell:hover .speech-bubble {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.duidui-art {
+  width: 220px;
+  height: 240px;
+  margin-top: 15px;
+  overflow: visible;
+}
+
+.chat-toggle,
+.state-cycle {
+  position: absolute;
+  z-index: 4;
+  right: 16px;
+  border: 1px solid rgba(125, 68, 40, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 247, 232, 0.94);
+  color: #5a3928;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.chat-toggle {
+  top: 43px;
+  padding: 5px 8px;
+}
+
+.state-cycle {
+  bottom: 24px;
+  padding: 4px 7px;
+}
+
+.chat-panel {
+  position: absolute;
+  z-index: 5;
+  left: 12px;
+  right: 12px;
+  bottom: 18px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(125, 68, 40, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.98);
+  box-shadow: 0 10px 28px rgba(82, 51, 31, 0.18);
+}
+
+.chat-panel header,
+.chat-panel form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-panel header {
+  justify-content: space-between;
+  color: #5a3928;
+  font-size: 12px;
+}
+
+.chat-panel header button {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: #f6d2a0;
+  color: #5a3928;
+  cursor: pointer;
+}
+
+.chat-list {
+  display: grid;
+  gap: 5px;
+  max-height: 116px;
+  overflow: auto;
+}
+
+.chat-message,
+.empty-chat {
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.chat-message.user {
+  justify-self: end;
+  background: #3f5057;
+  color: #fff7e8;
+}
+
+.chat-message.duidui,
+.empty-chat {
+  justify-self: start;
+  background: #f5dbc0;
+  color: #3b2a21;
+}
+
+.chat-panel input {
+  min-width: 0;
+  flex: 1;
+  height: 30px;
+  border: 1px solid rgba(125, 68, 40, 0.28);
+  border-radius: 7px;
+  padding: 0 8px;
+  background: #fffaf0;
+  color: #3b2a21;
+}
+
+.chat-panel form button {
+  height: 30px;
+  border: 0;
+  border-radius: 7px;
+  padding: 0 9px;
+  background: #31b66c;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.typing-dots {
+  display: inline-block;
+  animation: dots 0.8s steps(2, end) infinite;
+}
+
+.shadow {
+  fill: rgba(67, 42, 28, 0.18);
+}
+
+.body ellipse,
+.head ellipse,
+.ear,
+.tail path,
+.arm {
+  fill: #a9653b;
+}
+
+.ear,
+.tail path {
+  stroke: #7d4428;
+  stroke-width: 4;
+}
+
+.tail path {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.tail-tip {
+  stroke-width: 8 !important;
+}
+
+.belly,
+.muzzle,
+.snout,
+.muzzle-bridge {
+  fill: #f7e2bd;
+}
+
+.snout {
+  stroke: rgba(125, 68, 40, 0.18);
+  stroke-width: 2;
+}
+
+.muzzle-bridge {
+  fill: #f0c99c;
+}
+
+.forehead-patch {
+  fill: #7d4428;
+  opacity: 0.55;
+}
+
+.head {
+  transform-origin: 110px 120px;
+  animation: breathe 3.4s ease-in-out infinite;
+}
+
+.body {
+  transform-origin: 110px 184px;
+  animation: breathe 3.4s ease-in-out infinite;
+}
+
+.tail {
+  transform-origin: 76px 176px;
+  animation: tail 2.8s ease-in-out infinite;
+}
+
+.left-ear {
+  transform-origin: 72px 50px;
+  animation: leftEarWave 3.3s ease-in-out infinite;
+}
+
+.right-ear {
+  transform-origin: 148px 50px;
+  animation: rightEarWave 3.3s ease-in-out infinite;
+}
+
+.backpack {
+  fill: #e99841;
+  stroke: #7d4428;
+  stroke-width: 3;
+}
+
+.strap {
+  fill: none;
+  stroke: #7d4428;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.collar {
+  fill: none;
+  stroke: #31b66c;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.tag {
+  fill: #f0b15f;
+  stroke: #7d4428;
+  stroke-width: 2;
+}
+
+.eye {
+  fill: #2b1d15;
+  transform-origin: center;
+  animation: blink 4.8s ease-in-out infinite;
+}
+
+.sad-eye,
+.sad-mouth {
+  display: none;
+  fill: none;
+  stroke: #2b1d15;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.nose {
+  fill: #2b1d15;
+}
+
+.mouth,
+.cheek-dot {
+  fill: none;
+  stroke: #2b1d15;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.tongue {
+  fill: #e98273;
+  opacity: 0;
+}
+
+.happy-eye,
+.glasses {
+  display: none;
+  fill: none;
+  stroke: #2b1d15;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.blush {
+  fill: #e98273;
+  opacity: 0;
+}
+
+.arms path {
+  fill: none;
+  stroke: #8b5330;
+  stroke-width: 15;
+  stroke-linecap: round;
+}
+
+.hello-paw {
+  opacity: 0;
+  transform-origin: 158px 128px;
+}
+
+.heart-pop path {
+  fill: #e98273;
+  opacity: 0.82;
+  animation: heartFloat 1.6s ease-in-out infinite;
+}
+
+.heart-pop path:last-child {
+  animation-delay: 0.45s;
+}
+
+.paw-waves {
+  opacity: 0;
+}
+
+.paw-waves path,
+.ambient-waves path {
+  fill: none;
+  stroke: #e99841;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+
+.ambient-waves path {
+  animation: waveFlicker 2.7s ease-in-out infinite;
+}
+
+.wave-b {
+  animation-delay: 0.45s !important;
+}
+
+.wave-c {
+  animation-delay: 0.9s !important;
+}
+
+.laptop {
+  transform-origin: 110px 187px;
+}
+
+.screen {
+  fill: #3f5057;
+  stroke: #2f3b40;
+  stroke-width: 4;
+}
+
+.base {
+  fill: #2f3b40;
+}
+
+.logo-dot {
+  fill: #f6d2a0;
+  opacity: 0.85;
+}
+
+.keys rect {
+  fill: #70838a;
+}
+
+.code-lines text {
+  fill: #75e48a;
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 7px;
+  opacity: 0.2;
+}
+
+.gc-objects .obj {
+  fill: #f0b15f;
+  stroke: #7d4428;
+  stroke-width: 2;
+  animation: collect 2.7s ease-in-out infinite;
+  --collect-x: 55px;
+  --collect-y: 70px;
+}
+
+.gc-objects .obj-b {
+  --collect-x: -60px;
+  --collect-y: 65px;
+  animation-delay: 0.45s;
+}
+
+.gc-objects .obj-c {
+  --collect-x: 66px;
+  --collect-y: 34px;
+  animation-delay: 0.9s;
+}
+
+.gc-objects .obj-d {
+  --collect-x: -48px;
+  --collect-y: 28px;
+  animation-delay: 1.15s;
+}
+
+.gc-objects .obj-e {
+  --collect-x: 78px;
+  --collect-y: -8px;
+  animation-delay: 1.45s;
+}
+
+.gc-path {
+  fill: none;
+  stroke: #31b66c;
+  stroke-dasharray: 4 6;
+  stroke-linecap: round;
+  stroke-width: 2;
+  opacity: 0.55;
+  animation: pathFlow 1.3s linear infinite;
+}
+
+.gc-path.delay {
+  animation-delay: 0.4s;
+}
+
+.gc-path.slow {
+  animation-duration: 1.8s;
+}
+
+.status-pop rect {
+  fill: #db4b45;
+  filter: drop-shadow(0 5px 8px rgba(86, 31, 31, 0.18));
+}
+
+.status-pop text {
+  fill: #fff4ea;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.flag-pole {
+  fill: none;
+  stroke: #7d4428;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.flag {
+  fill: #31b66c;
+  stroke: #227f50;
+  stroke-width: 2;
+  animation: flagWave 1.4s ease-in-out infinite;
+}
+
+.deploy-text {
+  fill: #227f50 !important;
+  font-size: 13px !important;
+}
+
+.full-gc-text {
+  fill: #227f50;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.confetti path {
+  fill: none;
+  stroke: #e99841;
+  stroke-width: 4;
+  stroke-linecap: round;
+  animation: confettiWave 1.2s ease-in-out infinite;
+}
+
+.confetti circle {
+  fill: #31b66c;
+  animation: confettiWave 1.2s ease-in-out infinite;
+}
+
+.sleep-bubbles text {
+  fill: #7d4428;
+  font-size: 18px;
+  font-weight: 800;
+  animation: zzz 2s ease-in-out infinite;
+}
+
+.sleep-bubbles text:last-child {
+  animation-delay: 0.6s;
+}
+
+.blanket,
+.coffee,
+.headphones,
+.meeting-doodle {
+  display: none;
+}
+
+.blanket {
+  fill: #6d7f91;
+  opacity: 0.86;
+}
+
+.headphones {
+  fill: none;
+  stroke: #2f3b40;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.coffee rect {
+  fill: #f6d2a0;
+  stroke: #7d4428;
+  stroke-width: 3;
+}
+
+.coffee path {
+  fill: none;
+  stroke: #7d4428;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.steam {
+  animation: steam 1.4s ease-in-out infinite;
+}
+
+.meeting-doodle rect {
+  fill: #fffaf0;
+  stroke: #7d4428;
+  stroke-width: 2;
+}
+
+.meeting-doodle path {
+  fill: none;
+  stroke: #7d4428;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.state-coding .laptop {
+  animation: typing 0.36s ease-in-out infinite;
+}
+
+.state-coding .arms path {
+  animation: paws 0.36s ease-in-out infinite;
+}
+
+.state-coding .left-ear,
+.state-coding .right-ear {
+  animation-duration: 1.2s;
+}
+
+.state-coding .code-lines text {
+  opacity: 1;
+  animation: codePulse 0.9s ease-in-out infinite;
+}
+
+.state-coding .code-lines text:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.state-coding .code-lines text:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.state-gc .backpack {
+  animation: backpack 1.5s ease-in-out infinite;
+}
+
+.state-full_gc .gc-objects .obj {
+  animation-duration: 1.05s;
+}
+
+.state-gc .right-arm {
+  animation: gcSweep 1.2s ease-in-out infinite;
+}
+
+.state-full_gc .right-arm,
+.state-full_gc .left-arm {
+  animation: gcSweep 0.72s ease-in-out infinite;
+}
+
+.state-success .right-arm {
+  transform-origin: 153px 139px;
+  transform: rotate(-24deg);
+}
+
+.state-idle .hello-paw,
+.state-success .hello-paw {
+  opacity: 1;
+  animation: helloWave 1.2s ease-in-out infinite;
+}
+
+.state-happy .eye,
+.state-pet .eye,
+.state-shy .eye,
+.state-excited .eye,
+.state-celebrate .eye {
+  display: none;
+}
+
+.state-happy .happy-eye,
+.state-pet .happy-eye,
+.state-shy .happy-eye,
+.state-excited .happy-eye,
+.state-celebrate .happy-eye {
+  display: block;
+}
+
+.state-shy .blush,
+.state-pet .blush {
+  opacity: 0.75;
+}
+
+.state-shy .head {
+  animation: shyNod 1.8s ease-in-out infinite;
+}
+
+.state-happy .tail,
+.state-pet .tail,
+.state-excited .tail,
+.state-celebrate .tail {
+  animation-duration: 0.8s;
+}
+
+.state-curious .head {
+  transform-origin: 110px 112px;
+  animation: curiousTilt 1.3s ease-in-out infinite;
+}
+
+.state-tired .body,
+.state-anti_work .body {
+  transform-origin: 110px 160px;
+  animation: tiredSink 2.8s ease-in-out infinite;
+}
+
+.state-tired .tail,
+.state-anti_work .tail {
+  animation: none;
+  opacity: 0.55;
+}
+
+.state-worried .head {
+  animation: worriedShake 0.42s ease-in-out infinite;
+}
+
+.state-lonely .code-lines text {
+  opacity: 0.75;
+}
+
+.state-lonely .head {
+  animation: lonelyLook 3.4s ease-in-out infinite;
+}
+
+.state-meeting .meeting-doodle {
+  display: block;
+}
+
+.state-meeting .code-lines {
+  opacity: 0.15;
+}
+
+.state-overtime .blanket,
+.state-overtime .coffee,
+.state-eat .coffee {
+  display: block;
+}
+
+.state-eat .coffee {
+  animation: coffeeLift 1.1s ease-in-out infinite;
+}
+
+.state-requirement_change .req-card {
+  animation: reqJump 0.75s ease-in-out infinite;
+}
+
+.state-bug_fix .glasses {
+  display: block;
+}
+
+.state-bug_fix .head {
+  animation: bugFixFocus 1.4s ease-in-out infinite;
+}
+
+.state-focus .headphones {
+  display: block;
+}
+
+.state-focus .laptop,
+.state-focus .arms path {
+  animation: typing 0.32s ease-in-out infinite;
+}
+
+.state-thinking .speech-bubble {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.state-dragging .arms path {
+  stroke-width: 20;
+}
+
+.state-dragging .laptop {
+  animation: hugLaptop 0.6s ease-in-out infinite;
+}
+
+.state-idle .paw-waves,
+.state-success .paw-waves {
+  opacity: 1;
+  animation: waveFlicker 1.2s ease-in-out infinite;
+}
+
+.state-success .flag-pole {
+  animation: poleWave 1.3s ease-in-out infinite;
+}
+
+.state-error .eye,
+.state-error .idle-mouth {
+  display: none;
+}
+
+.state-error .sad-eye,
+.state-error .sad-mouth {
+  display: block;
+}
+
+.state-error .head {
+  animation: errorNod 2.1s ease-in-out infinite;
+}
+
+.state-error .left-ear {
+  transform: rotate(9deg) translateY(5px);
+}
+
+.state-worried .left-ear,
+.state-bug_fix .left-ear,
+.state-anti_work .left-ear,
+.state-tired .left-ear {
+  transform: rotate(9deg) translateY(5px);
+}
+
+.state-worried .right-ear,
+.state-bug_fix .right-ear,
+.state-anti_work .right-ear,
+.state-tired .right-ear {
+  transform: rotate(-9deg) translateY(5px);
+}
+
+.state-error .right-ear {
+  transform: rotate(-9deg) translateY(5px);
+}
+
+.state-error .tongue {
+  opacity: 0;
+}
+
+.state-sleep .duidui-art {
+  animation: sleepFloat 3.2s ease-in-out infinite;
+}
+
+.state-sleep .laptop {
+  opacity: 0.28;
+}
+
+.state-sleep .body,
+.state-sleep .head {
+  transform-origin: 110px 150px;
+  transform: rotate(-8deg);
+}
+
+.state-idle .tongue,
+.state-success .tongue,
+.state-happy .tongue,
+.state-pet .tongue,
+.state-excited .tongue,
+.state-celebrate .tongue {
+  opacity: 1;
+}
+
+.focus-mode {
+  width: 120px;
+  height: 140px;
+}
+
+.focus-mode .duidui-art {
+  width: 120px;
+  height: 132px;
+  margin-top: 0;
+}
+
+.focus-mode .speech-bubble,
+.focus-mode .pet-title,
+.focus-mode .chat-toggle,
+.focus-mode .state-cycle {
+  display: none;
+}
+
+.focus-mode .chat-panel {
+  display: none;
+}
+
+.settings-page {
+  height: 100%;
+  overflow: auto;
+  padding: 24px;
+  background: linear-gradient(180deg, #fff7e8 0%, #f5dbc0 100%);
+  color: #3b2a21;
+}
+
+.settings-page header {
+  margin-bottom: 22px;
+}
+
+.settings-page header span {
+  color: #8b5330;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.settings-page h1 {
+  margin: 6px 0;
+  color: #3b2a21;
+  font-size: 25px;
+  line-height: 1.15;
+}
+
+.settings-page p {
+  margin: 0;
+  color: #6c4b38;
+  font-size: 14px;
+}
+
+.settings-section {
+  display: grid;
+  gap: 18px;
+}
+
+.settings-section label {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 9px 14px;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid rgba(125, 68, 40, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.76);
+}
+
+.settings-section span {
+  font-weight: 800;
+}
+
+.settings-section strong {
+  color: #8b5330;
+}
+
+.settings-section input[type="range"],
+.settings-section select {
+  grid-column: 1 / -1;
+}
+
+.settings-section input[type="range"] {
+  accent-color: #e99841;
+}
+
+.settings-section select {
+  min-width: 0;
+  height: 36px;
+  border: 1px solid rgba(125, 68, 40, 0.28);
+  border-radius: 6px;
+  background: #fffaf0;
+  color: #3b2a21;
+}
+
+.settings-section .switch-row {
+  grid-template-columns: 1fr auto;
+}
+
+.settings-section input[type="checkbox"] {
+  width: 44px;
+  height: 24px;
+  accent-color: #31b66c;
+}
+
+.settings-page footer {
+  margin-top: 22px;
+  color: #6c4b38;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.history-section {
+  margin-top: 18px;
+  padding: 15px;
+  border: 1px solid rgba(125, 68, 40, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.76);
+}
+
+.history-section header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 10px;
+}
+
+.history-section button {
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 10px;
+  background: #8b5330;
+  color: #fffaf0;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.history-list {
+  display: grid;
+  gap: 7px;
+  max-height: 180px;
+  overflow: auto;
+}
+
+.history-list p {
+  margin: 0;
+  padding: 7px 8px;
+  border-radius: 7px;
+  background: #fff7e8;
+  color: #3b2a21;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.history-list p.duidui {
+  background: #f5dbc0;
+}
+
+.history-list span {
+  margin-right: 6px;
+  color: #8b5330;
+  font-weight: 900;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(2px) scaleY(1.015);
+  }
+}
+
+@keyframes blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.12);
+  }
+}
+
+@keyframes tail {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-14deg);
+  }
+}
+
+@keyframes dots {
+  0% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes heartFloat {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(5px) scale(0.8);
+  }
+  45% {
+    opacity: 0.9;
+    transform: translateY(-4px) scale(1);
+  }
+}
+
+@keyframes leftEarWave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(5deg) translateY(2px);
+  }
+}
+
+@keyframes rightEarWave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-5deg) translateY(2px);
+  }
+}
+
+@keyframes typing {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(1.5px);
+  }
+}
+
+@keyframes paws {
+  0%,
+  100% {
+    stroke-width: 15;
+  }
+  50% {
+    stroke-width: 18;
+  }
+}
+
+@keyframes helloWave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(18deg) translateY(-3px);
+  }
+}
+
+@keyframes waveFlicker {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.75;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes codePulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes collect {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  70% {
+    opacity: 0.2;
+    transform: translate(var(--collect-x), var(--collect-y)) scale(0.35);
+  }
+}
+
+@keyframes pathFlow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@keyframes backpack {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes gcSweep {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-16deg) translateY(-4px);
+  }
+}
+
+@keyframes flagWave {
+  0%,
+  100% {
+    transform: skewY(0deg);
+  }
+  50% {
+    transform: skewY(-4deg);
+  }
+}
+
+@keyframes poleWave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes confettiWave {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-4px) rotate(5deg);
+  }
+}
+
+@keyframes shyNod {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(3px) rotate(-3deg);
+  }
+}
+
+@keyframes curiousTilt {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes tiredSink {
+  0%,
+  100% {
+    transform: translateY(5px) scaleY(0.98);
+  }
+  50% {
+    transform: translateY(9px) scaleY(0.94);
+  }
+}
+
+@keyframes worriedShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes lonelyLook {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-3px);
+  }
+}
+
+@keyframes coffeeLift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(-4deg);
+  }
+}
+
+@keyframes reqJump {
+  0%,
+  100% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(7px);
+  }
+}
+
+@keyframes bugFixFocus {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes hugLaptop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.96);
+  }
+}
+
+@keyframes steam {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(2px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+.pet-shell.image-pet {
+  width: 260px;
+  height: 300px;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.image-pet.chat-mode {
+  width: 486px;
+}
+
+.image-pet .pet-stage {
+  position: relative;
+  width: 260px;
+  height: 300px;
+  flex: 0 0 260px;
+}
+
+.image-pet .pet-button {
+  position: absolute;
+  inset: 26px 0 0;
+  height: 274px;
+}
+
+.puppy-art {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  width: 238px;
+  height: 238px;
+  object-fit: contain;
+  translate: -50% 0;
+  transform-origin: center 88%;
+  filter: drop-shadow(0 10px 10px rgba(64, 38, 18, 0.2));
+  animation: puppyBreathe 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.image-pet .pet-shadow {
+  position: absolute;
+  left: 58px;
+  right: 48px;
+  bottom: 10px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(67, 42, 28, 0.18);
+  filter: blur(2px);
+}
+
+.image-pet .pet-title {
+  bottom: 5px;
+  z-index: 3;
+}
+
+.image-pet .compact-bubble {
+  top: 6px;
+  max-width: 205px;
+  z-index: 5;
+}
+
+.image-pet .chat-toggle {
+  top: 42px;
+  right: 12px;
+}
+
+.image-pet .state-cycle {
+  right: 18px;
+  bottom: 34px;
+  z-index: 4;
+}
+
+.laptop-hotspot {
+  position: absolute;
+  z-index: 6;
+  left: 102px;
+  top: 147px;
+  width: 106px;
+  height: 62px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.image-pet .sidecar-chat {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 198px;
+  height: 212px;
+  align-self: flex-end;
+  margin-bottom: 43px;
+  border-color: rgba(125, 68, 40, 0.2);
+  padding: 9px;
+  gap: 7px;
+}
+
+.image-pet .chat-list {
+  max-height: 112px;
+}
+
+.image-pet .sidecar-chat header {
+  font-size: 11px;
+}
+
+.image-pet .sidecar-chat .chat-message,
+.image-pet .sidecar-chat .empty-chat {
+  padding: 6px 7px;
+  font-size: 11px;
+}
+
+.image-pet .sidecar-chat input {
+  height: 28px;
+  font-size: 12px;
+}
+
+.image-pet .sidecar-chat form button {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.status-badge,
+.coffee-prop,
+.flag-prop,
+.zzz-prop,
+.thinking-prop,
+.req-card-prop {
+  position: absolute;
+  z-index: 4;
+  display: none;
+  border: 1px solid rgba(125, 68, 40, 0.22);
+  border-radius: 9px;
+  background: rgba(255, 247, 232, 0.96);
+  color: #4b2d1e;
+  box-shadow: 0 8px 18px rgba(82, 51, 31, 0.16);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.status-badge {
+  top: 36px;
+  left: 22px;
+  padding: 8px 10px;
+  color: #227f50;
+}
+
+.state-error .status-badge,
+.state-worried .status-badge,
+.state-bug_fix .status-badge,
+.state-anti_work .status-badge,
+.state-requirement_change .status-badge {
+  color: #db4b45;
+}
+
+.state-overtime .status-badge,
+.state-focus .status-badge,
+.state-eat .status-badge {
+  color: #8b5330;
+}
+
+.state-error .status-badge,
+.state-worried .status-badge,
+.state-bug_fix .status-badge,
+.state-anti_work .status-badge,
+.state-requirement_change .status-badge,
+.state-overtime .status-badge,
+.state-success .status-badge,
+.state-excited .status-badge,
+.state-celebrate .status-badge,
+.state-full_gc .status-badge,
+.state-focus .status-badge,
+.state-eat .status-badge {
+  display: block;
+  animation: badgeFloat 1.5s ease-in-out infinite;
+}
+
+.state-aura {
+  position: absolute;
+  z-index: 1;
+  left: 34px;
+  top: 62px;
+  width: 188px;
+  height: 188px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(246, 210, 160, 0.38), rgba(246, 210, 160, 0));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.jvm-halo {
+  position: absolute;
+  z-index: 2;
+  left: 36px;
+  top: 48px;
+  display: none;
+  width: 188px;
+  height: 188px;
+  border: 1px dashed rgba(49, 182, 108, 0.45);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.jvm-halo::after {
+  content: "JVM";
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  translate: -50% 0;
+  padding: 3px 6px;
+  border-radius: 7px;
+  background: rgba(255, 247, 232, 0.94);
+  color: #227f50;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.jvm-halo i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  background: #75e48a;
+  box-shadow: 0 0 0 3px rgba(117, 228, 138, 0.18);
+}
+
+.jvm-halo i:nth-child(1) {
+  left: 20px;
+  top: 58px;
+}
+
+.jvm-halo i:nth-child(2) {
+  right: 24px;
+  top: 78px;
+}
+
+.jvm-halo i:nth-child(3) {
+  left: 86px;
+  bottom: 18px;
+}
+
+.state-gc .jvm-halo,
+.state-full_gc .jvm-halo,
+.state-coding .jvm-halo,
+.state-focus .jvm-halo {
+  display: block;
+  animation: haloRotate 5.5s linear infinite;
+}
+
+.heap-meter {
+  position: absolute;
+  z-index: 4;
+  left: 20px;
+  bottom: 64px;
+  display: none;
+  width: 44px;
+  height: 42px;
+  padding: 8px 6px 5px;
+  border: 1px solid rgba(125, 68, 40, 0.22);
+  border-radius: 9px;
+  background: rgba(255, 247, 232, 0.94);
+  box-shadow: 0 8px 18px rgba(82, 51, 31, 0.14);
+  pointer-events: none;
+}
+
+.heap-meter i {
+  display: block;
+  height: 4px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  background: #31b66c;
+  animation: heapPulse 1.4s ease-in-out infinite;
+}
+
+.heap-meter i:nth-child(2) {
+  width: 72%;
+  animation-delay: 0.2s;
+}
+
+.heap-meter i:nth-child(3) {
+  width: 48%;
+  animation-delay: 0.4s;
+}
+
+.heap-meter b {
+  display: block;
+  color: #7d4428;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.state-coding .heap-meter,
+.state-focus .heap-meter,
+.state-gc .heap-meter,
+.state-worried .heap-meter,
+.state-full_gc .heap-meter {
+  display: block;
+}
+
+.tail-signal {
+  position: absolute;
+  z-index: 4;
+  left: 18px;
+  bottom: 92px;
+  display: none;
+  width: 48px;
+  height: 34px;
+  pointer-events: none;
+}
+
+.tail-signal i {
+  position: absolute;
+  inset: 0;
+  border-left: 3px solid #e99841;
+  border-radius: 50%;
+  animation: tailPing 1s ease-in-out infinite;
+}
+
+.tail-signal i:nth-child(2) {
+  left: -10px;
+  animation-delay: 0.2s;
+}
+
+.state-happy .tail-signal,
+.state-pet .tail-signal,
+.state-excited .tail-signal,
+.state-celebrate .tail-signal {
+  display: block;
+}
+
+.log-scan {
+  position: absolute;
+  z-index: 5;
+  right: 33px;
+  bottom: 94px;
+  display: none;
+  width: 88px;
+  height: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(117, 228, 138, 0.38);
+  border-radius: 5px;
+  background: rgba(47, 59, 64, 0.92);
+  color: #75e48a;
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 9px;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.log-scan::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(117, 228, 138, 0.45), transparent);
+  animation: scanLine 1.1s linear infinite;
+}
+
+.state-bug_fix .log-scan,
+.state-error .log-scan,
+.state-worried .log-scan {
+  display: block;
+}
+
+.code-spark {
+  position: absolute;
+  z-index: 5;
+  display: none;
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+  background: #75e48a;
+  box-shadow: 0 7px 0 #75e48a, 0 14px 0 rgba(117, 228, 138, 0.75);
+  pointer-events: none;
+}
+
+.spark-a {
+  right: 48px;
+  bottom: 139px;
+}
+
+.spark-b {
+  right: 74px;
+  bottom: 126px;
+  width: 28px;
+  opacity: 0.8;
+}
+
+.state-coding .code-spark,
+.state-focus .code-spark {
+  display: block;
+  animation: sparkRun 0.8s ease-in-out infinite;
+}
+
+.state-happy .state-aura,
+.state-pet .state-aura,
+.state-shy .state-aura,
+.state-excited .state-aura,
+.state-celebrate .state-aura {
+  opacity: 1;
+  animation: auraPulse 1.8s ease-in-out infinite;
+}
+
+.heart {
+  position: absolute;
+  z-index: 4;
+  display: none;
+  width: 18px;
+  height: 18px;
+  rotate: -45deg;
+  background: #e98273;
+  pointer-events: none;
+}
+
+.heart::before,
+.heart::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e98273;
+}
+
+.heart::before {
+  top: -9px;
+  left: 0;
+}
+
+.heart::after {
+  top: 0;
+  left: 9px;
+}
+
+.heart-a {
+  top: 58px;
+  left: 40px;
+}
+
+.heart-b {
+  top: 84px;
+  right: 31px;
+  scale: 0.72;
+}
+
+.state-happy .heart,
+.state-pet .heart,
+.state-shy .heart,
+.state-excited .heart {
+  display: block;
+  animation: imageHeartFloat 1.6s ease-in-out infinite;
+}
+
+.coffee-prop {
+  right: 18px;
+  bottom: 88px;
+  padding: 8px 9px;
+  background: #6a442f;
+  color: #fff7e8;
+}
+
+.state-eat .coffee-prop,
+.state-overtime .coffee-prop {
+  display: block;
+  animation: propBounce 1.2s ease-in-out infinite;
+}
+
+.headphone-prop {
+  position: absolute;
+  z-index: 5;
+  display: none;
+  left: 68px;
+  top: 67px;
+  width: 124px;
+  height: 68px;
+  border: 4px solid rgba(47, 59, 64, 0.92);
+  border-bottom: 0;
+  border-radius: 76px 76px 0 0;
+  box-shadow: inset 0 3px 0 rgba(255, 247, 232, 0.38);
+  pointer-events: none;
+}
+
+.headphone-prop::before,
+.headphone-prop::after {
+  content: "";
+  position: absolute;
+  bottom: -22px;
+  width: 20px;
+  height: 42px;
+  border: 3px solid rgba(47, 59, 64, 0.96);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #3f5057, #243035);
+  box-shadow: inset 0 0 0 3px rgba(246, 210, 160, 0.18);
+}
+
+.headphone-prop::before {
+  left: -7px;
+  rotate: -8deg;
+}
+
+.headphone-prop::after {
+  right: -7px;
+  rotate: 8deg;
+}
+
+.state-focus .headphone-prop {
+  display: block;
+}
+
+.blanket-prop {
+  position: absolute;
+  z-index: 2;
+  display: none;
+  left: 49px;
+  bottom: 45px;
+  width: 164px;
+  height: 86px;
+  border-radius: 28px 28px 22px 22px;
+  background: rgba(109, 127, 145, 0.72);
+  pointer-events: none;
+}
+
+.state-overtime .blanket-prop,
+.state-tired .blanket-prop,
+.state-anti_work .blanket-prop {
+  display: block;
+}
+
+.flag-prop {
+  top: 78px;
+  right: 28px;
+  display: none;
+  width: 36px;
+  height: 27px;
+  border-color: #227f50;
+  background: #31b66c;
+  color: #fff;
+  font-size: 18px;
+  place-items: center;
+}
+
+.state-success .flag-prop,
+.state-excited .flag-prop,
+.state-celebrate .flag-prop {
+  display: grid;
+  animation: flagWaveImage 0.75s ease-in-out infinite;
+}
+
+.zzz-prop,
+.thinking-prop {
+  top: 58px;
+  right: 28px;
+  padding: 8px 10px;
+}
+
+.state-sleep .zzz-prop,
+.state-lonely .zzz-prop {
+  display: block;
+  animation: badgeFloat 1.8s ease-in-out infinite;
+}
+
+.state-thinking .thinking-prop {
+  display: block;
+  animation: dots 0.8s steps(2, end) infinite;
+}
+
+.gc-chip {
+  position: absolute;
+  z-index: 3;
+  display: none;
+  width: 17px;
+  height: 17px;
+  border: 2px solid #7d4428;
+  border-radius: 5px;
+  background: #f0b15f;
+  pointer-events: none;
+}
+
+.chip-a {
+  left: 16px;
+  top: 92px;
+  --gc-x: 95px;
+  --gc-y: 92px;
+}
+
+.chip-b {
+  right: 18px;
+  top: 102px;
+  --gc-x: -74px;
+  --gc-y: 82px;
+}
+
+.chip-c {
+  left: 30px;
+  bottom: 84px;
+  --gc-x: 82px;
+  --gc-y: -12px;
+}
+
+.state-gc .gc-chip,
+.state-full_gc .gc-chip {
+  display: block;
+  animation: imageCollect 2s ease-in-out infinite;
+}
+
+.state-full_gc .gc-chip {
+  animation-duration: 0.9s;
+}
+
+.req-card-prop {
+  top: 44px;
+  left: 28px;
+  padding: 8px 10px;
+}
+
+.state-requirement_change .req-card-prop {
+  display: block;
+  animation: reqJump 0.75s ease-in-out infinite;
+}
+
+.paw-wave {
+  position: absolute;
+  z-index: 4;
+  display: none;
+  right: 35px;
+  top: 112px;
+  width: 32px;
+  height: 28px;
+  border-right: 3px solid #e99841;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.mood-dock {
+  position: absolute;
+  z-index: 7;
+  left: 8px;
+  bottom: 72px;
+  display: grid;
+  gap: 4px;
+}
+
+.mood-dock button {
+  min-width: 28px;
+  height: 24px;
+  border: 1px solid rgba(125, 68, 40, 0.2);
+  border-radius: 8px;
+  padding: 0 6px;
+  background: rgba(255, 247, 232, 0.94);
+  color: #5a3928;
+  box-shadow: 0 5px 12px rgba(82, 51, 31, 0.1);
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.mood-dock button:hover {
+  background: #f6d2a0;
+}
+
+.wave-two {
+  right: 23px;
+  top: 104px;
+  width: 44px;
+  height: 40px;
+  opacity: 0.55;
+}
+
+.state-happy .paw-wave,
+.state-pet .paw-wave,
+.state-success .paw-wave,
+.state-celebrate .paw-wave {
+  display: block;
+  animation: waveFlicker 1.2s ease-in-out infinite;
+}
+
+.state-coding .puppy-art,
+.state-focus .puppy-art {
+  animation: puppyTyping 0.42s ease-in-out infinite;
+}
+
+.state-curious .puppy-art {
+  animation: puppyCurious 1.5s ease-in-out infinite;
+}
+
+.state-shy .puppy-art {
+  animation: puppyShy 1.6s ease-in-out infinite;
+}
+
+.state-tired .puppy-art,
+.state-anti_work .puppy-art {
+  animation: puppyTired 2.6s ease-in-out infinite;
+}
+
+.state-worried .puppy-art,
+.state-bug_fix .puppy-art,
+.state-error .puppy-art {
+  animation: puppyWorried 0.5s ease-in-out infinite;
+}
+
+.state-dragging .puppy-art {
+  animation: puppyHug 0.6s ease-in-out infinite;
+}
+
+.state-sleep .puppy-art {
+  animation: puppySleep 3.2s ease-in-out infinite;
+}
+
+.state-success .puppy-art,
+.state-excited .puppy-art,
+.state-celebrate .puppy-art {
+  animation: puppyCelebrate 0.8s ease-in-out infinite;
+}
+
+.focus-mode.image-pet {
+  width: 150px;
+  height: 170px;
+}
+
+.focus-mode.image-pet .pet-stage {
+  width: 150px;
+  height: 170px;
+  flex-basis: 150px;
+}
+
+.focus-mode.image-pet .pet-button {
+  inset: 0;
+  height: 170px;
+}
+
+.focus-mode .puppy-art {
+  width: 138px;
+  height: 138px;
+  bottom: 8px;
+}
+
+.focus-mode .pet-shadow,
+.focus-mode .status-badge,
+.focus-mode .state-aura,
+.focus-mode .heart,
+.focus-mode .coffee-prop,
+.focus-mode .headphone-prop,
+.focus-mode .blanket-prop,
+.focus-mode .flag-prop,
+.focus-mode .zzz-prop,
+.focus-mode .thinking-prop,
+.focus-mode .gc-chip,
+.focus-mode .req-card-prop,
+.focus-mode .paw-wave,
+.focus-mode .laptop-hotspot {
+  display: none !important;
+}
+
+.focus-mode .mood-dock,
+.focus-mode .jvm-halo,
+.focus-mode .heap-meter,
+.focus-mode .tail-signal,
+.focus-mode .log-scan,
+.focus-mode .code-spark {
+  display: none !important;
+}
+
+@keyframes puppyBreathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(2px) scale(1.012);
+  }
+}
+
+@keyframes puppyTyping {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(1px) rotate(-1deg);
+  }
+}
+
+@keyframes puppyCurious {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
+
+@keyframes puppyShy {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+    filter: drop-shadow(0 10px 10px rgba(64, 38, 18, 0.2)) saturate(1.05);
+  }
+  50% {
+    transform: translateY(3px) rotate(-2deg);
+    filter: drop-shadow(0 10px 10px rgba(64, 38, 18, 0.2)) saturate(1.22);
+  }
+}
+
+@keyframes puppyTired {
+  0%,
+  100% {
+    transform: translateY(4px) scaleY(0.985);
+  }
+  50% {
+    transform: translateY(8px) scaleY(0.965);
+  }
+}
+
+@keyframes puppyWorried {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes puppyHug {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.97);
+  }
+}
+
+@keyframes puppySleep {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+@keyframes puppyCelebrate {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+@keyframes badgeFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes auraPulse {
+  0%,
+  100% {
+    transform: scale(0.92);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.75;
+  }
+}
+
+@keyframes imageHeartFloat {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.75);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(-8px) scale(1);
+  }
+}
+
+@keyframes propBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes flagWaveImage {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes imageCollect {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  75% {
+    opacity: 0.12;
+    transform: translate(var(--gc-x), var(--gc-y)) scale(0.25);
+  }
+}
+
+@keyframes haloRotate {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes heapPulse {
+  0%,
+  100% {
+    width: 42%;
+  }
+  50% {
+    width: 100%;
+  }
+}
+
+@keyframes tailPing {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: scale(0.72);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+}
+
+@keyframes scanLine {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes sparkRun {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-6px);
+  }
+}
+
+@keyframes errorNod {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+@keyframes sleepFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+@keyframes zzz {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}

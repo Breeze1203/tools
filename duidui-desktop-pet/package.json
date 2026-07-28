@@ -1,0 +1,53 @@
+{
+  "name": "duidui-desktop-pet",
+  "version": "0.1.0",
+  "description": "堆堆桌宠",
+  "main": "dist-electron/main.js",
+  "author": "Duidui",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:renderer": "vite --host 127.0.0.1",
+    "dev:electron": "tsc -p tsconfig.electron.json && wait-on tcp:5173 file:dist-electron/main.js && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.electron.json --noEmit",
+    "build": "tsc -p tsconfig.json --noEmit && vite build && tsc -p tsconfig.electron.json",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.7",
+    "typescript": "^5.7.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "wait-on": "^8.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2"
+  },
+  "build": {
+    "appId": "dev.duidui.desktop-pet",
+    "productName": "堆堆桌宠",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    }
+  }
+}
