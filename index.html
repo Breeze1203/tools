@@ -2,12 +2,15 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>Breeze's Tools Index</title>
+  <!-- 0 秒后自动跳转到 sql-plan 页面 -->
+  <meta http-equiv="refresh" content="0; url=./sql-plan/">
+  <title>正在跳转至 SQL 执行计划解析器...</title>
+  <script>
+    // JS 双重保险跳转
+    window.location.replace("./sql-plan/");
+  </script>
 </head>
 <body>
-  <h1>我的在线小工具箱</h1>
-  <ul>
-    <li><a href="./explain_tool/">SQL 执行计划解析器</a></li>
-  </ul>
+  <p>如果页面没有自动跳转，请点击 <a href="./explain_tool/">SQL 执行计划解析器</a>。</p>
 </body>
 </html>
